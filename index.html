@@ -1,12 +1,18 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>PDF SKU Extractor</title>
-    </head>
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.jsx"></script>
-    </body>
-    </html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Processing App</title>
+  </head>
+  <body>
+    <h1>Upload Invoice and Label PDFs</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="invoice" accept=".pdf" required>
+      <input type="file" name="label" accept=".pdf" required>
+      <button type="submit">Upload and Process</button>
+    </form>
+    <pre id="result"></pre>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+  </html>
