@@ -69,9 +69,11 @@ const express = require('express');
           const updatedLabels = matchAndCopySKU(invoiceText, labelText);
 
           // Create a PDF document
-          const doc = new PDFDocument();
           const pdfPath = path.join(uploadsDir, 'updated_labels.pdf');
-          doc.pipe(fs.createWriteStream(pdfPath));
+          const doc = new PDFDocument();
+          const writeStream = fs.createWriteStream(pdfPath);
+
+          doc.pipe(writeStream);
 
           updatedLabels.forEach(label => {
             doc.text(label);
@@ -80,18 +82,25 @@ const express = require('express');
 
           doc.end();
 
+          writeStream.on('finish', () => {
+            res.download(pdfPath, 'updated_labels.pdf', (err) => {
+              if (err) {
+                console.error('Error downloading the file:', err);
+                res.status(500).send('Error downloading the file');
+              } else {
+                // Delete the PDF file after successful download
+                fs.unlinkSync(pdfPath);
+              }
+            });
+          });
+
+          writeStream.on('error', (err) => {
+            console.error('Error writing the PDF file:', err);
+            res.status(500).send('Error creating the PDF file');
+          });
+
           fs.unlinkSync(invoicePath);
           fs.unlinkSync(labelPath);
-
-          res.download(pdfPath, 'updated_labels.pdf', (err) => {
-            if (err) {
-              console.error('Error downloading the file:', err);
-              res.status(500).send('Error downloading the file');
-            } else {
-              // Delete the PDF file after successful download
-              fs.unlinkSync(pdfPath);
-            }
-          });
         } catch (error) {
           res.status(500).send('Error processing files');
         }
