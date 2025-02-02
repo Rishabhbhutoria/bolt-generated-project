@@ -9,6 +9,13 @@ const express = require('express');
   app.use(express.json());
   app.use(fileUpload());
 
+  const uploadsDir = path.join(__dirname, 'uploads');
+
+// Ensure the uploads directory exists
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+  }
+
   async function extractTextFromPDF(filePath) {
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdfParse(dataBuffer);
@@ -45,8 +52,8 @@ const express = require('express');
       return res.status(400).send('No files were uploaded.');
     }
 
-    const invoicePath = path.join(__dirname, 'uploads', invoiceFile.name);
-    const labelPath = path.join(__dirname, 'uploads', labelFile.name);
+    const invoicePath = path.join(uploadsDir, invoiceFile.name);
+    const labelPath = path.join(uploadsDir, labelFile.name);
 
     invoiceFile.mv(invoicePath, async (err) => {
       if (err) return res.status(500).send(err);
