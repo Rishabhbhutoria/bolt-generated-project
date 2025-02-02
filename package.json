@@ -9,7 +9,8 @@
     "dependencies": {
       "express": "^4.18.2",
       "pdf-parse": "^1.1.1",
-      "express-fileupload": "^1.4.0"
+      "express-fileupload": "^1.4.0",
+      "pdfkit": "^0.13.0"
     },
     "devDependencies": {
       "vite": "^4.2.0"

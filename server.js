@@ -3,6 +3,7 @@ const express = require('express');
   const fs = require('fs');
   const pdfParse = require('pdf-parse');
   const path = require('path');
+  const PDFDocument = require('pdfkit');
 
   const app = express();
   app.use(express.urlencoded({ extended: true }));
@@ -11,7 +12,7 @@ const express = require('express');
 
   const uploadsDir = path.join(__dirname, 'uploads');
 
-// Ensure the uploads directory exists
+  // Ensure the uploads directory exists
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
   }
@@ -41,7 +42,7 @@ const express = require('express');
       return sku ? `${line} - SKU: ${sku}` : line;
     });
 
-    return updatedLabels.join('\n');
+    return updatedLabels;
   }
 
   app.post('/upload', (req, res) => {
@@ -67,10 +68,30 @@ const express = require('express');
 
           const updatedLabels = matchAndCopySKU(invoiceText, labelText);
 
+          // Create a PDF document
+          const doc = new PDFDocument();
+          const pdfPath = path.join(uploadsDir, 'updated_labels.pdf');
+          doc.pipe(fs.createWriteStream(pdfPath));
+
+          updatedLabels.forEach(label => {
+            doc.text(label);
+            doc.moveDown();
+          });
+
+          doc.end();
+
           fs.unlinkSync(invoicePath);
           fs.unlinkSync(labelPath);
 
-          res.send(updatedLabels);
+          res.download(pdfPath, 'updated_labels.pdf', (err) => {
+            if (err) {
+              console.error('Error downloading the file:', err);
+              res.status(500).send('Error downloading the file');
+            } else {
+              // Delete the PDF file after successful download
+              fs.unlinkSync(pdfPath);
+            }
+          });
         } catch (error) {
           res.status(500).send('Error processing files');
         }
