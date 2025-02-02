@@ -15,19 +15,20 @@ const fs = require('fs');
     return new Promise((resolve, reject) => {
       form.parse(event, async (err, fields, files) => {
         if (err) {
+          console.error('Error parsing form:', err);
           return resolve({ statusCode: 500, body: 'Error parsing form' });
         }
 
-        const invoiceFile = files.invoice[0];
-        const labelFile = files.label[0];
-
-        const invoicePath = path.join(uploadsDir, invoiceFile.originalFilename);
-        const labelPath = path.join(uploadsDir, labelFile.originalFilename);
-
-        fs.renameSync(invoiceFile.path, invoicePath);
-        fs.renameSync(labelFile.path, labelPath);
-
         try {
+          const invoiceFile = files.invoice[0];
+          const labelFile = files.label[0];
+
+          const invoicePath = path.join(uploadsDir, invoiceFile.originalFilename);
+          const labelPath = path.join(uploadsDir, labelFile.originalFilename);
+
+          fs.renameSync(invoiceFile.path, invoicePath);
+          fs.renameSync(labelFile.path, labelPath);
+
           const invoiceText = await extractTextFromPDF(invoicePath);
           const labelText = await extractTextFromPDF(labelPath);
 
@@ -64,6 +65,7 @@ const fs = require('fs');
             resolve({ statusCode: 500, body: 'Error creating the PDF file' });
           });
         } catch (error) {
+          console.error('Error processing files:', error);
           resolve({ statusCode: 500, body: 'Error processing files' });
         }
       });
